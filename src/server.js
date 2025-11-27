@@ -31,7 +31,6 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(morgan("combined")); // HTTP request logger
 
 // Apply general rate limiting to all routes
-app.use("/api/", generalLimiter);
 
 // Routes
 app.use("/api/auth", authRoutes);
