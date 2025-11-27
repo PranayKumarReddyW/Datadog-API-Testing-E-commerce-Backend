@@ -23,9 +23,17 @@ const generateRefreshToken = (id) => {
 // @route   POST /api/auth/signup
 // @access  Public
 exports.signup = asyncHandler(async (req, res) => {
-  const { name, email, password, phone } = req.body;
+  const { name, email, password, phone, id } = req.body;
 
-  // Check if user already exists
+  // Validate required fields
+  if (!name || !email || !password || !phone) {
+    return res.status(400).json({
+      success: false,
+      message: "All fields (name, email, password, phone) are required",
+    });
+  }
+
+  // Check if user already exists by email
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return res.status(400).json({
@@ -34,12 +42,24 @@ exports.signup = asyncHandler(async (req, res) => {
     });
   }
 
+  // Optional: Check if ID is provided and already exists
+  if (id) {
+    const existingId = await User.findOne({ id });
+    if (existingId) {
+      return res.status(400).json({
+        success: false,
+        message: "User with this ID already exists",
+      });
+    }
+  }
+
   // Create user
   const user = await User.create({
     name,
     email,
     password,
     phone,
+    ...(id && { id }), // Only include `id` if it's provided
   });
 
   res.status(201).json({
@@ -52,7 +72,6 @@ exports.signup = asyncHandler(async (req, res) => {
     },
   });
 });
-
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
